@@ -32,6 +32,7 @@
 # 
 # Output: named PDF
 ######################################################################
+INI=archivatepdf.ini
 
 usage() { echo "Usage: $0 [-d|-a] [-c] [PDF-SOURCE]... -- script to individually name pdfs echo." 1>&2; exit 1; }
 
@@ -55,4 +56,20 @@ while getopts ":dach" opt; do
 done
 shift $(($OPTIND - 1))
 
+if [ -e $INI ]; then
+    ID_digital=$(awk -F "=" '/ID_digital/ {print $2}' $INI)
+    ID_analog=$(awk -F "=" '/ID_analog/ {print $2}' $INI)
+    
+    echo $ID_digital
+    echo $ID_analog
+else
+    echo "ERROR: Cannot find ini-file: $INI" 1>&2;
+    exit 1;
+fi
 
+
+
+echo "ID_digital = $ID_digital">$INI
+echo "ID_analog  = $ID_analog">>$INI
+
+exit 0;
