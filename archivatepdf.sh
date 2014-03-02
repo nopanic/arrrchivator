@@ -29,16 +29,19 @@
 #       all analog copies
 #   -c
 #       add comments for each file
+#   -s
+#       show pdfs with mupdf
 # 
 # Output: named PDF
 ######################################################################
 INI=archivatepdf.ini
 
-usage() { echo "Usage: $0 [-d|-a] [-c] [PDF-SOURCE]... -- script to individually name pdfs echo." 1>&2; exit 1; }
+usage() { echo "Usage: $0 [-d|-a] [-c] [-s] [PDF-SOURCE]... -- script to index pdfs." 1>&2; exit 1; }
 
-MODE=interacitve
+MODE=interactive
 COMMENT=false
-while getopts ":dach" opt; do
+SHOW=false
+while getopts ":dachs" opt; do
     case $opt in
         d)
             MODE=digital
@@ -49,6 +52,9 @@ while getopts ":dach" opt; do
         c)
             COMMENT=true
             ;;
+        s)
+            SHOW=true
+            ;;
         *)
             usage
             ;;
@@ -57,17 +63,58 @@ done
 shift $(($OPTIND - 1))
 
 if [ -e $INI ]; then
-    ID_digital=$(awk -F "=" '/ID_digital/ {print $2}' $INI)
-    ID_analog=$(awk -F "=" '/ID_analog/ {print $2}' $INI)
-    
-    echo $ID_digital
-    echo $ID_analog
+    ID_digital=$(awk -F "= " '/ID_digital/ {print $2}' $INI)
+    ID_analog=$(awk -F "= " '/ID_analog/ {print $2}' $INI)
 else
     echo "ERROR: Cannot find ini-file: $INI" 1>&2;
     exit 1;
 fi
 
+for file in $*; do
 
+    if [ $file == $INI ]; then
+        continue
+    fi
+
+    echo "Processing $file"
+
+    if $SHOW; then
+        mupdf $file 2>/dev/null &
+        mupdf_pid=$!
+    fi
+    
+    analog="n"
+    if [ $MODE == "interactive" ]; then
+        read -s -n 1 -p "Keep an analog copy? (y/n) " analog
+        echo
+    fi
+    
+    if [ $analog == "y" ] || [ $MODE == "analog" ]; then
+        ((ID_analog++))
+        filename="A$ID_analog";
+    else
+        ((ID_digital++))
+        filename="D$ID_digital";
+    fi
+
+    if $COMMENT; then
+        read -p "Please add a comment/title for this file: " comment
+        echo 
+        [[ $comment ]] && filename+="_"${comment}
+    fi
+    filename+=".pdf"
+    
+    mv $file $filename
+    
+    if $SHOW && kill -0 $mupdf_pid >/dev/null 2>&1; then
+        kill $mupdf_pid
+        wait $mupdf_pid 2>/dev/null
+    fi
+    
+    echo "Renamed file to: $filename"
+    echo "---------------------------"
+    echo
+done
 
 echo "ID_digital = $ID_digital">$INI
 echo "ID_analog  = $ID_analog">>$INI
