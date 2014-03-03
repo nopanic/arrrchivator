@@ -1,10 +1,14 @@
-# DAMS
+# arrrchivator
 
-DAMS is a collection of scripts to digitize, organize and manage your documents.
+arrrchivator is a collection of scripts to digitize, organize and manage your documents.
 
-## How they work
+## What the pirate wants:
 
-  # jpg -ocr> pdf:  Generate a searchable (multipage) PDF from jpgs
-  # pdf -name> pdf: Name files
-  # pdf -tmsu> pdf: Add useful tags to file
-  # search -> list: Search in PDF and tags to find documents
+  * jpg2pdf: Generate a searchable (multipage) PDF from jpgs
+  * namepdf: Name files
+  * tagpdf:  Add useful tags to file
+
+## What ya need:
+
+  * OCRmyPDF
+  * muPDF
