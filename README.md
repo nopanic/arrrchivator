@@ -12,3 +12,4 @@ arrrchivator is a collection of scripts to digitize, organize and manage your do
 
   * OCRmyPDF
   * muPDF
+  * tmsu
